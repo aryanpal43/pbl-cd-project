@@ -7,7 +7,6 @@
 // -----------------------------------------------------------
 
 export type NodeType =
-	// STATEMENTS
 	| "Program"
 	| "VarDeclaration"
 	| "FunctionDeclaration"
@@ -15,11 +14,9 @@ export type NodeType =
 	| "WhileStatement"
 	| "ForStatement"
 	| "ReturnStatement"
-	// EXPRESSIONS
 	| "AssignmentExpr"
 	| "MemberExpr"
 	| "CallExpr"
-	// Literals
 	| "Property"
 	| "ObjectLiteral"
 	| "NumericLiteral"

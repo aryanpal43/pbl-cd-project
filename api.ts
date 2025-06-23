@@ -3,9 +3,8 @@ import { evaluate } from "./runtime/interpreter.ts";
 import Parser from "./frontend/parser.ts";
 import { createGlobalEnv } from "./runtime/environment.ts";
 
-function runUserCode(code: string, inputs: any[] = []): string {
+async function runUserCode(code: string, inputs: any[] = []): Promise<string> {
   let output = "";
-  // Patch console.log to capture output
   const originalLog = console.log;
   console.log = (...args: any[]) => {
     output += args.join(" ") + "\n";
@@ -14,10 +13,8 @@ function runUserCode(code: string, inputs: any[] = []): string {
     const parser = new Parser();
     const ast = parser.produceAST(code);
     const env = createGlobalEnv();
-    // Attach inputProvider to env for scan()
     (env as any).inputProvider = Array.isArray(inputs) ? [...inputs] : [];
-    const result = await evaluate(ast, env);
-    // Show the result of the last evaluated expression if not null
+    const result: any = await evaluate(ast, env);
     if (result && result.type !== "null" && typeof result.value !== "undefined") {
       output += String(result.value) + "\n";
     }
@@ -35,7 +32,6 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }

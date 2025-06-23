@@ -30,6 +30,10 @@ import {
 	eval_object_expr,
 } from "./eval/expressions.ts";
 
+function isVarDeclaration(node: Stmt): node is VarDeclaration {
+	return node.kind === "VarDeclaration";
+}
+
 export async function evaluate(astNode: Stmt, env: Environment): Promise<RuntimeVal> {
 	switch (astNode.kind) {
 		case "NumericLiteral":
@@ -58,7 +62,6 @@ export async function evaluate(astNode: Stmt, env: Environment): Promise<Runtime
 		}
 		case "Program":
 			return await eval_program(astNode as Program, env);
-		// Handle statements
 		case "VarDeclaration":
 			return await eval_var_declaration(astNode as VarDeclaration, env);
 		case "FunctionDeclaration":
@@ -98,7 +101,7 @@ export async function evaluate(astNode: Stmt, env: Environment): Promise<Runtime
 			let result: RuntimeVal = MK_NULL();
 			const loopEnv = new Environment(env);
 			if (init) {
-				if (init.kind === "VarDeclaration") {
+				if (isVarDeclaration(init)) {
 					await eval_var_declaration(init, loopEnv);
 				} else {
 					await evaluate(init, loopEnv);
@@ -117,12 +120,11 @@ export async function evaluate(astNode: Stmt, env: Environment): Promise<Runtime
 			return result;
 		}
 		case "StringLiteral":
-			return MK_STRING(astNode.value);
+			return MK_STRING((astNode as StringLiteral).value);
 		case "ReturnStatement": {
-			const value = astNode.value ? await evaluate(astNode.value, env) : MK_NULL();
+			const value = (astNode as ReturnStatement).value ? await evaluate((astNode as ReturnStatement).value!, env) : MK_NULL();
 			throw { type: "__return__", value };
 		}
-		// Handle unimplimented ast types as error.
 		default:
 			console.error(
 				"This AST Node has not yet been setup for interpretation.\n",
